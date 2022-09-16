@@ -183,6 +183,7 @@ func newDynamicClient(ctx *types.APIRequest, cfg *rest.Config, impersonate bool)
 }
 
 func newClient(ctx *types.APIRequest, cfg *rest.Config, s *types.APISchema, namespace string, impersonate bool) (dynamic.ResourceInterface, error) {
+	cfg.WarningHandler = APIWarnings{ctx}
 	client, err := newDynamicClient(ctx, cfg, impersonate)
 	if err != nil {
 		return nil, err
@@ -190,4 +191,16 @@ func newClient(ctx *types.APIRequest, cfg *rest.Config, s *types.APISchema, name
 
 	gvr := attributes.GVR(s)
 	return client.Resource(gvr).Namespace(namespace), nil
+}
+
+type APIWarnings struct {
+	ap *types.APIRequest
+}
+
+func (aw APIWarnings) HandleWarningHeader(code int, agent string, message string) {
+	if code != 299 || len(message) == 0 {
+		return
+	}
+
+	aw.ap.Response.Header().Set("X-API-Warnings", message)
 }
