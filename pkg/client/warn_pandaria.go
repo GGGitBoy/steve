@@ -1,7 +1,9 @@
 package client
 
 import (
+	"fmt"
 	"github.com/rancher/apiserver/pkg/types"
+	"net/url"
 )
 
 type APIWarnings struct {
@@ -13,5 +15,9 @@ func (am APIWarnings) HandleWarningHeader(code int, agent string, message string
 		return
 	}
 
-	am.ar.Response.Header().Add("X-API-Warnings", message)
+	fmt.Println("jiandao =====")
+	fmt.Println(message)
+	fmt.Println(url.QueryEscape(message))
+
+	am.ar.Response.Header().Add("X-API-Warnings", url.QueryEscape(message))
 }
